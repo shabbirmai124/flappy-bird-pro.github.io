@@ -67,7 +67,7 @@
         });
       }
     </script>
-    <script type="module" crossorigin src="./assets/index-B75wBEPr.js"></script>
+    <script type="module" src="./src/game/main.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-spGK1_-Q.css">
   </head>
   <body>
@@ -141,7 +141,7 @@
         <!-- 1. MAIN MENU SCREEN -->
         <section id="menu-screen" class="ui-screen">
           <div class="logo-area">
-            <img src="./assets/hero-CLDdwZDr.png" alt="Hero Icon" class="hero-icon" style="width: 80px; height: 80px; margin-bottom: 10px; animation: loadBounce 2s ease-in-out infinite alternate; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));" />
+            <canvas id="menu-hero-bird" width="96" height="96" class="hero-icon" aria-label="Flappy Bird Hero" style="width: 88px; height: 88px; margin-bottom: 6px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.45));"></canvas>
             <h2 class="game-title">FLAPPY BIRD <span class="logo-pro">PRO</span></h2>
             <p class="logo-by">by <strong>Md Shabbir Mia</strong></p>
           </div>
@@ -172,7 +172,7 @@
           </button>
 
           <div class="menu-buttons">
-            <button id="play-btn" class="btn btn-primary btn-large">PLAY</button>
+            <button id="play-btn" data-start="true" class="btn btn-primary btn-large">PLAY</button>
             <div class="submenu-grid">
               <button id="shop-btn" class="btn btn-secondary">SKINS</button>
               <button id="achievements-btn" class="btn btn-secondary">AWARDS</button>
@@ -252,7 +252,7 @@
             </div>
 
             <div class="menu-buttons">
-              <button id="restart-btn" class="btn btn-primary btn-large">PLAY AGAIN</button>
+              <button id="restart-btn" data-start="true" class="btn btn-primary btn-large">PLAY AGAIN</button>
               <div class="submenu-grid">
                 <button id="share-btn" class="btn btn-share">SHARE</button>
                 <button id="quit-btn" class="btn btn-secondary">MENU</button>
@@ -466,7 +466,6 @@
           <span class="footer-sep">·</span>
           <a href="#" class="footer-link">Terms of Use</a>
         </p>
-        <p class="footer-built">Built with HTML5 Canvas &amp; JavaScript</p>
       </footer>
 
     </div><!-- /page-wrapper -->
@@ -481,24 +480,28 @@
 
     <!-- ═══ Loading Screen JS ═══ -->
     <script>
-      // Animate loading bar then hide loading screen
+      // Animate loading bar then hide loading screen (skip immediately for ?autostart=1)
       const bar = document.getElementById('loading-bar');
       const loadingScreen = document.getElementById('loading-screen');
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 18 + 5;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          setTimeout(() => {
-            if (loadingScreen) {
-              loadingScreen.style.opacity = '0';
-              setTimeout(() => loadingScreen.style.display = 'none', 500);
-            }
-          }, 300);
-        }
-        if (bar) bar.style.width = Math.min(progress, 100) + '%';
-      }, 120);
+      if (new URLSearchParams(window.location.search).get('autostart') === '1') {
+        if (loadingScreen) loadingScreen.style.display = 'none';
+      } else {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 24 + 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setTimeout(() => {
+              if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => loadingScreen.style.display = 'none', 400);
+              }
+            }, 200);
+          }
+          if (bar) bar.style.width = Math.min(progress, 100) + '%';
+        }, 90);
+      }
     </script>
 
     <!-- ═══ Background Particles JS ═══ -->

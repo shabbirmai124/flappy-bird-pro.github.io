@@ -1,7 +1,7 @@
 // Flappy Bird PRO — Service Worker
 // © 2026 Md Shabbir Mia · All Rights Reserved
 
-const CACHE_NAME = 'flappy-bird-pro-v3';
+const CACHE_NAME = 'flappy-bird-pro-v4';
 
 const PRECACHE_ASSETS = [
   './',

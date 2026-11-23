@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build": "node -e \"import('fs').then(fs=>{const req=['index.html','assets/index-B75wBEPr.js','assets/index-spGK1_-Q.css','assets/hero-CLDdwZDr.png'];for(const f of req){if(!fs.existsSync(f))throw new Error('Missing '+f)}console.log('Static assets verified')})\"",
-    "lint": "node --check server.js && node --check assets/index-B75wBEPr.js && node --check sw.js"
+    "test": "node --test src/game/physics.test.js",
+    "build": "node -e \"import('fs').then(fs=>{const req=['index.html','assets/index-spGK1_-Q.css','src/game/main.js','src/game/physics.js','src/game/birdRenderer.js','src/game/entities.js','src/game/ui.js'];for(const f of req){if(!fs.existsSync(f))throw new Error('Missing '+f)}console.log('Static & game modules verified')})\"",
+    "lint": "node --check server.js && node --check sw.js && node --check src/game/config.js && node --check src/game/physics.js && node --check src/game/storage.js && node --check src/game/audio.js && node --check src/game/particles.js && node --check src/game/birdRenderer.js && node --check src/game/background.js && node --check src/game/entities.js && node --check src/game/input.js && node --check src/game/ui.js && node --check src/game/main.js"
   },
   "dependencies": {
     "express": "^4.21.2"
