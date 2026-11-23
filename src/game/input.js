@@ -5,6 +5,7 @@ export class InputManager {
     this.pauseCallbacks = [];
     this.anyKeyCallbacks = [];
     this.heldKeys = new Set();
+    this._lastTouchTime = 0;
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onKeyUp = this._onKeyUp.bind(this);
     this._onMouseDown = this._onMouseDown.bind(this);
@@ -25,6 +26,12 @@ export class InputManager {
     this.anyKeyCallbacks.push(cb);
   }
 
+  _isTextInputTarget(target) {
+    if (!target) return false;
+    const tag = target.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || Boolean(target.isContentEditable);
+  }
+
   _isInteractiveTarget(target) {
     if (!target || typeof target.closest !== 'function') return false;
     return Boolean(
@@ -40,6 +47,8 @@ export class InputManager {
   }
 
   _onKeyDown(e) {
+    if (this._isTextInputTarget(e.target)) return;
+
     const isJumpKey =
       e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Tab';
     const isPauseKey = e.code === 'Escape' || e.code === 'KeyP';
@@ -67,6 +76,7 @@ export class InputManager {
   }
 
   _onMouseDown(e) {
+    if (Date.now() - this._lastTouchTime < 500) return;
     if (this._isInteractiveTarget(e.target)) return;
     if (e.button === 0) {
       this.triggerJump();
@@ -75,6 +85,7 @@ export class InputManager {
   }
 
   _onTouchStart(e) {
+    this._lastTouchTime = Date.now();
     if (this._isInteractiveTarget(e.target)) return;
     this.triggerJump();
     this.triggerAnyKey();

@@ -34,6 +34,7 @@ export class Game {
     this.lastPipeTime = 0;
     this.maxComboThisRun = 0;
     this.continuesUsed = 0;
+    this._runFinalized = false;
     this.continueTimer = 0;
     this.continueInterval = null;
 
@@ -105,6 +106,7 @@ export class Game {
     this.comboCount = 0;
     this.maxComboThisRun = 0;
     this.continuesUsed = 0;
+    this._runFinalized = false;
     this.lastPipeTime = 0;
     this.hitstopTimer = 0;
     this.accumulator = 0;
@@ -230,11 +232,6 @@ export class Game {
     }
 
     storage.updateMaxCombo(this.maxComboThisRun);
-    storage.incrementGamesPlayed();
-    storage.checkAchievements(this.score, this.maxComboThisRun, (ach) => {
-      this.ui.showToast(`Achievement: ${ach.name}! (+${ach.reward} coins)`, 'success');
-    });
-    storage.addLeaderboardEntry(this.score, storage.data.selectedSkin);
     storage.save();
 
     setTimeout(() => {
@@ -242,10 +239,23 @@ export class Game {
         if (this.continuesUsed < GAME_CONFIG.MAX_CONTINUES && this.score >= 3) {
           this._startContinueCountdown();
         } else {
-          this.ui.showGameOver(this.score, this.coinsEarned);
+          this._finalizeAndShowGameOver();
         }
       }
     }, 750);
+  }
+
+  _finalizeAndShowGameOver() {
+    if (!this._runFinalized) {
+      this._runFinalized = true;
+      storage.incrementGamesPlayed();
+      storage.checkAchievements(this.score, this.maxComboThisRun, (ach) => {
+        this.ui.showToast(`Achievement: ${ach.name}! (+${ach.reward} coins)`, 'success');
+      });
+      storage.addLeaderboardEntry(this.score, storage.data.selectedSkin);
+      storage.save();
+    }
+    this.ui.showGameOver(this.score, this.coinsEarned);
   }
 
   _startContinueCountdown() {
@@ -258,7 +268,7 @@ export class Game {
       this.ui.updateContinueTimer(this.continueTimer);
       if (this.continueTimer <= 0) {
         this._cancelContinueTimer();
-        this.ui.showGameOver(this.score, this.coinsEarned);
+        this._finalizeAndShowGameOver();
       }
     }, 1000);
   }
@@ -295,7 +305,7 @@ export class Game {
 
   skipContinue() {
     this._cancelContinueTimer();
-    this.ui.showGameOver(this.score, this.coinsEarned);
+    this._finalizeAndShowGameOver();
   }
 
   loop(nowMs) {
