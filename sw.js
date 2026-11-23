@@ -1,7 +1,7 @@
 // Flappy Bird PRO — Service Worker
 // © 2026 Md Shabbir Mia · All Rights Reserved
 
-const CACHE_NAME = 'flappy-bird-pro-v2';
+const CACHE_NAME = 'flappy-bird-pro-v3';
 
 const PRECACHE_ASSETS = [
   './',
@@ -10,7 +10,7 @@ const PRECACHE_ASSETS = [
   './manifest.json'
 ];
 
-// Install — pre-cache all assets
+// Install — pre-cache core assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -32,27 +32,35 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — serve from cache, fall back to network
+// Fetch — network-first for navigation/HTML, cache-first for hashed static assets
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET and chrome-extension requests
   if (event.request.method !== 'GET') return;
   if (event.request.url.startsWith('chrome-extension://')) return;
+
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((c) => c || caches.match('./index.html')))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        // Cache valid responses
         if (response && response.status === 200 && response.type === 'basic') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        // Offline fallback for navigation
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
       });
     })
   );
